@@ -30,25 +30,25 @@ for (var i = 0; i <7; i++) {
 		index++;
 		var poke=poker[index]
 		$('<div>').attr('bb',index).attr('id',i+'_'+j).attr('data-num',poke.number).addClass('pai').css({backgroundImage:'url(image/'+dict[poke.number]+''+poke.color+'.png)'}).appendTo('.scence').delay(index*30).animate({
-			left:(6-i)*71+j*142,
-			top:i*40,
+			left:(6-i)*40+80*j+25,
+			top:i*30+25,
 			opacity:1
 		})
 
 	};
 };
 for (var i =0; i <24; i++) {
-	
 	 var v=poker[index]
 	 index++;
   		$('<div>').attr('bb',index).attr('data-num',v.number).addClass('pai left').css({backgroundImage:'url(image/'+dict[v.number]+''+v.color+'.png)'}).appendTo('.scence').delay(index*30).animate({
-			left:205,
-			top:432,
+			left:150,
+			top:330,
 			opacity:1
 		})
   	};  	
  }
-var linkL=$('.leftbtn');
+ // 向右移动牌
+var linkL=$('.move-right');
 linkL.on('mousedown',false)
 linkL.on('click',(function(){
 	var zIndex=0;
@@ -58,14 +58,14 @@ linkL.on('click',(function(){
 		pre=null;
 	}
   $('.left').last().css('zIndex',zIndex++).animate({
-  	left:650
+  	left:375
   }).queue(function(){
   	$(this).removeClass('left').addClass('right').dequeue()
   }) 
  }
 })())
-
-var linkR=$('.rightbtn')
+// 向左移动牌
+var linkR=$('.move-left')
 linkR.on('mousedown',false)
 linkR.on('click',(function(){
 	var num=0
@@ -83,7 +83,7 @@ linkR.on('click',(function(){
 		}
 	$('.right').each(function(i,v){
 			$(this).css('zIndex',0).delay(i*50).animate({
-				left:190
+				left:150
 			}).queue(function(){
         	 $(this).removeClass('right').addClass('left').dequeue()
           }) 
@@ -130,9 +130,9 @@ $('.scence').on('click','.pai',function(){
 			$(this).detach().dequeue()
 			// 注意记得出对
 		})
-		$('.scord .zhi').text(scord+'分')
-		$('.dang').text('当前配对:'+pi)
-		$('.sheng').text('剩余配对:'+(26-pi))
+		$('.score .font').text(scord)
+		$('.dangqian .font').text(pi)
+	    $('.shengyu .font').text(26-pi)
 		return 
 	}
 	// 如果前一张有记录则进行如下判断
@@ -146,9 +146,9 @@ $('.scence').on('click','.pai',function(){
 		}).queue(function(){
 			$(this).detach().dequeue()
 		})
-		$('.dang').text('当前配对:'+pi)
-		$('.sheng').text('剩余配对:'+(26-pi))
-		$('.scord .zhi').text(scord+'分')
+		$('.dangqian .font').text(pi)
+	   $('.shengyu .font').text(26-pi)
+		$('.score .font').text(scord)
 		}else{
 			if($(this).attr('bb')==$(pre).attr('bb')){
 				pre.animate({top:'+=15'})
@@ -166,61 +166,68 @@ $('.scence').on('click','.pai',function(){
 		pre.animate({top:'-=15'})
 	}
 })
-// 倒计时
-var m=3;
-var s=60;
-function time(){
-	$('.time').text('倒计时:'+m+'分'+s+'秒')
-	if(s==0&&m==0){
-		s=0;
-		return
-	}
-   s-=1;
-   if(s==0){
-	   	if(m==0){
-	   		m=0;
-	   	}else{
-	   	 m-=1;
-	   	 s=60
-	   	}
-   }
-}
-setInterval(time,1000)
+
+// 计时器
+   var jishi=$('.time .font');
+   var time=0; 
+   var min=0;
+   var second=0;
+   var state;
+  function time1(){
+     if(state=="over"){
+      time = 0;
+      min=0;
+      second=0;
+      jishi.html("00:00");
+      return;
+    }
+    time +=1; 
+    second=time%60;
+    if(time%60 == 0){
+      min = parseInt(min);
+      min += 1;
+      min = (min<10)?'0'+min:min;
+    }
+    second = (second<10)?'0'+second:second;
+    jishi.html(min +':'+second);
+    state="play"
+  }
+
 
 // 点击开始游戏
+var t;
 $('.start').on('mousedown',false)
 $('.start').on('click',function(){
-	$('.xx').show()
-     m=3;
-     s=60;
+	state="play"
+	clearInterval(t);
+     t=setInterval(time1,1000)
 	$('.pai').detach()
 	setPoker(makePoker())
 })
 // 点击重置
 $('.reset').on('mousedown',false)
 $('.reset').on('click',function(){
-	m=3;
-    s=60;
-	// $('.btn').show(500)
-	$('.xx').show()
 	scord=0;
 	pi=0
-	$('.dang').text('当前配对:'+pi)
-	$('.sheng').text('剩余配对:'+(26-pi))
-	$('.scord .zhi').text('0分')
+	$('.dangqian .font').text(pi)
+	$('.shengyu .font').text(26-pi)
+	$('.score .font').text(scord)
 	$('.pai').detach()
 	setPoker(makePoker())
 })
-
+$('.js').on('click',function(){
+	$('.jieshao').slideToggle("slow");
+})
 // 结束游戏
 $('.end').on('mousedown',false)
 $('.end').on('click',function(){
-	$('.xx').hide(500)
+	state="over"
+	clearInterval(t)
 	scord=0;
 	pi=0
-	$('.dang').text('当前配对:'+pi)
-	$('.sheng').text('剩余配对:'+(26-pi))
-	$('.scord .zhi').text('0分')
+	$('.dangqian .font').text(pi)
+	$('.shengyu .font').text(26-pi)
+	$('.score .font').text(scord)
 	$('.pai').hide(1000,function(){
 		$('.pai').detach()
 	})
